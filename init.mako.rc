@@ -375,9 +375,6 @@ service qcamerasvr /system/bin/mm-qcamera-daemon
     class late_start
     user camera
     group camera system inet input
-    # Restart cameraserver in case it starts before qcamerasvr
-    on property:init.svc.qcamerasvr=running
-    restart cameraserver
 
 service wcnss_init /system/bin/sh /system/etc/init.mako.wifi.sh
     class late_start
@@ -411,3 +408,21 @@ service diag_mdlog /system/bin/diag_mdlog -s 100
 
 # on property:gsm.sim.state=READY
 #    start diag_mdlog
+
+# inform hdmi driver that boot completed
+on property:dev.bootcomplete=1
+    write /sys/devices/virtual/graphics/fb1/hdmi_boot_completed 1
+
+# external block api
+on property:sys.hdmi.block=block
+    write /sys/devices/virtual/graphics/fb1/hdmi_external_block block
+
+on property:sys.hdmi.block=unblock
+    write /sys/devices/virtual/graphics/fb1/hdmi_external_block unblock
+
+on property:sys.hdmi.block=internal_block
+    write /sys/devices/virtual/graphics/fb1/hdmi_external_block internal_block
+
+# Restart media in case it starts before qcamerasvr
+on property:init.svc.qcamerasvr=running
+    restart media
